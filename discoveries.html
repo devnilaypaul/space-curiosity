@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Discoveries — Space Curiosity</title>
+  <meta name="description" content="Timeline of discoveries that shaped space science.">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/icons.svg" type="image/svg+xml">
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header"><div class="wrap nav">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
+    <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
+    <nav class="nav-links" id="navlinks" aria-label="Primary"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+  </div></header>
+  <main id="main" class="wrap">
+    <section class="hero"><h1>Discoveries</h1><p class="lead">Ideas and observations that rewrote the story, from heliocentrism to gravitational waves.</p></section>
+    <div class="toolbar" role="search">
+      <input type="search" id="q" placeholder="Search discoveries" aria-label="Search discoveries">
+      <select id="cat" aria-label="Filter by category"><option value="">All categories</option></select>
+    </div>
+    <div class="result-count" id="count"></div>
+    <div class="timeline" id="list"></div>
+  </main>
+  <footer class="site-footer"><div class="wrap"><div>Space Curiosity.</div><div>© <span id="year"></span> Space Curiosity</div></div></footer>
+  <script type="module">
+    import { initChrome } from "./js/main.js";
+    import { initStarfield } from "./js/starfield.js";
+    import { loadJSON, bindFavorites, favButton, openDialog, esc } from "./js/ui.js";
+    initChrome(); initStarfield();
+    const q = document.getElementById("q");
+    const cat = document.getElementById("cat");
+    const data = await loadJSON("data/discoveries.json");
+    const rows0 = data.discoveries;
+    [...new Set(rows0.map((d) => d.category))].sort().forEach((v) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = v; cat.appendChild(o);
+    });
+    function render() {
+      const query = q.value.trim().toLowerCase();
+      const rows = rows0.filter((d) => {
+        if (cat.value && d.category !== cat.value) return false;
+        if (query && [d.title, d.summary, d.credit].join(" ").toLowerCase().includes(query)) return true;
+        return !query;
+      });
+      document.getElementById("count").textContent = `${rows.length} discoveries shown.`;
+      const el = document.getElementById("list");
+      el.innerHTML = rows.map((d) => `
+        <article class="t-item">
+          <time>${esc(d.date)}</time>
+          <h3>${esc(d.title)}</h3>
+          <div class="meta"><span class="tag">${esc(d.category)}</span><span class="tag">${esc(d.credit)}</span></div>
+          <p>${esc(d.summary)}</p>
+          <div class="card-actions"><button class="btn btn-small" data-id="${esc(d.id)}">More</button>${favButton(d.id)}</div>
+        </article>`).join("") || `<div class="empty">No discoveries match.</div>`;
+      bindFavorites(el);
+    }
+    document.getElementById("list").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-id]");
+      if (!b) return;
+      const v = rows0.find((x) => x.id === b.getAttribute("data-id"));
+      if (v) openDialog(`<div class="meta"><span class="tag">${esc(v.category)}</span><span class="tag">${esc(v.date)}</span></div><h3>${esc(v.title)}</h3><p>Credit: ${esc(v.credit)}. ${esc(v.summary)}</p>`);
+    });
+    [q, cat].forEach((el) => el.addEventListener("input", render));
+    render();
+  </script>
+</body>
+</html>

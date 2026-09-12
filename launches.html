@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Launches — Space Curiosity</title>
+  <meta name="description" content="Launch history timeline and upcoming launches with live data and offline fallback.">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/icons.svg" type="image/svg+xml">
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
+      <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
+      <nav class="nav-links" id="navlinks" aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="launches.html">Launches</a>
+        <a href="astronauts.html">Astronauts</a>
+        <a href="rockets.html">Rockets</a>
+        <a href="solar-system.html">Solar System</a>
+        <a href="discoveries.html">Discoveries</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="wrap">
+    <section class="hero">
+      <h1>Launches</h1>
+      <p class="lead">History below, future on top. Upcoming flights try live sources first and fall back to local data when offline.</p>
+    </section>
+    <div class="notice" id="launch-notice" role="status">Loading upcoming launches.</div>
+    <section aria-labelledby="up-h">
+      <div class="section-head"><div><h2 id="up-h">Upcoming launches</h2><p>Live when online, local fallback when not.</p></div></div>
+      <div class="grid" id="upcoming"></div>
+    </section>
+    <section aria-labelledby="hist-h">
+      <div class="section-head"><div><h2 id="hist-h">Launch history</h2><p>Filter by text, provider, or outcome.</p></div></div>
+      <div class="toolbar" role="search">
+        <input type="search" id="q" placeholder="Search missions, vehicles, pads" aria-label="Search launch history">
+        <select id="provider" aria-label="Filter by provider"><option value="">All providers</option></select>
+        <select id="outcome" aria-label="Filter by outcome"><option value="">All outcomes</option><option value="true">Success</option><option value="false">Failure</option></select>
+      </div>
+      <div class="result-count" id="count"></div>
+      <div class="timeline" id="history"></div>
+    </section>
+  </main>
+  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Live data: SpaceX and Launch Library 2. Fallback: local JSON.</div><nav aria-label="Footer"><a href="index.html">Home</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a></nav><div>© <span id="year"></span> Space Curiosity</div></div></footer>
+  <script type="module">
+    import { initChrome } from "./js/main.js";
+    import { initStarfield } from "./js/starfield.js";
+    import { getUpcomingLaunches } from "./js/api.js";
+    import { loadJSON, observeReveals, bindFavorites, favButton, openDialog, syncFiltersToURL, readFiltersFromURL, esc } from "./js/ui.js";
+    initChrome(); initStarfield();
+
+    const saved = readFiltersFromURL(["q", "provider", "outcome"]);
+    const q = document.getElementById("q");
+    const providerSel = document.getElementById("provider");
+    const outcomeSel = document.getElementById("outcome");
+    q.value = saved.q; providerSel.value = saved.provider; outcomeSel.value = saved.outcome;
+
+    const { launches: history } = await loadJSON("data/launches-history.json").then((d) => ({ launches: d.launches }));
+    const providers = [...new Set(history.map((l) => l.provider))].sort();
+    providers.forEach((p) => {
+      const o = document.createElement("option");
+      o.value = p; o.textContent = p;
+      if (saved.provider === p) o.selected = true;
+      providerSel.appendChild(o);
+    });
+
+    const up = await getUpcomingLaunches();
+    const notice = document.getElementById("launch-notice");
+    notice.textContent = up.source === "live"
+      ? "Showing live upcoming launches."
+      : up.source === "cache"
+        ? "Live API unreachable. Showing last cached launches."
+        : "Live API unreachable. Showing local fallback launches.";
+    if (up.source !== "live") notice.classList.add("warn");
+
+    const upEl = document.getElementById("upcoming");
+    upEl.innerHTML = up.launches.map((l) => `
+      <article class="card reveal visible">
+        ${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy">` : ""}
+        <div class="card-body">
+          <div class="meta"><span class="tag">${esc(l.provider)}</span><span class="tag-live tag">${up.source}</span></div>
+          <h3>${esc(l.name)}</h3>
+          <p class="desc">${esc(l.vehicle)} · ${l.date ? esc(new Date(l.date).toLocaleString()) : "Date TBD"}<br>${esc(l.pad ?? "")}</p>
+          <div class="card-actions"><button class="btn btn-small" data-detail="${esc(l.id)}">Details</button>${favButton(l.id)}</div>
+        </div>
+      </article>`).join("");
+    upEl.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-detail]");
+      if (!b) return;
+      const l = up.launches.find((x) => x.id === b.getAttribute("data-detail"));
+      if (l) openDialog(`<div class="meta"><span class="tag">${esc(l.provider)}</span><span class="tag">${esc(l.vehicle)}</span></div><h3>${esc(l.name)}</h3><p>${esc(l.details ?? "")} Pad: ${esc(l.pad ?? "Unknown")}. Date: ${l.date ? esc(new Date(l.date).toLocaleString()) : "TBD"}.</p>`);
+    });
+
+    function render() {
+      const query = q.value.trim().toLowerCase();
+      const prov = providerSel.value;
+      const out = outcomeSel.value;
+      syncFiltersToURL({ q: q.value.trim(), provider: prov, outcome: out });
+      const rows = history.filter((l) => {
+        if (prov && l.provider !== prov) return false;
+        if (out && String(l.success) !== out) return false;
+        if (query && ![l.name, l.vehicle, l.pad, l.summary].join(" ").toLowerCase().includes(query)) return false;
+        return true;
+      }).sort((a, b) => b.date.localeCompare(a.date));
+      document.getElementById("count").textContent = `${rows.length} of ${history.length} flights shown.`;
+      const el = document.getElementById("history");
+      el.innerHTML = rows.map((l) => `
+        <article class="t-item reveal visible">
+          <time datetime="${esc(l.date)}">${esc(l.date)}</time>
+          <h3>${esc(l.name)}</h3>
+          <div class="meta"><span class="tag">${esc(l.provider)}</span><span class="tag">${esc(l.vehicle)}</span><span class="tag">${l.success ? "Success" : "Failure"}</span></div>
+          <p>${esc(l.summary)} Pad: ${esc(l.pad)}.</p>
+          <div class="card-actions"><button class="btn btn-small" data-h="${esc(l.id)}">Details</button>${favButton(l.id)}</div>
+        </article>`).join("") || `<div class="empty">No launches match those filters.</div>`;
+    }
+    document.getElementById("history").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-h]");
+      if (!b) return;
+      const l = history.find((x) => x.id === b.getAttribute("data-h"));
+      if (l) openDialog(`${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy">` : ""}<div class="meta"><span class="tag">${esc(l.provider)}</span><span class="tag">${esc(l.vehicle)}</span></div><h3>${esc(l.name)}</h3><p>${esc(l.summary)}</p>`);
+    });
+    [q, providerSel, outcomeSel].forEach((el) => el.addEventListener("input", render));
+    render();
+    bindFavorites(document);
+    observeReveals(document);
+  </script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Space Curiosity — Explore Space History and Future</title>
+  <meta name="description" content="Space Curiosity covers launch history, upcoming launches, astronauts, rockets, solar system, and discoveries.">
+  <link rel="stylesheet" href="css/reset.css">
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/icons.svg" type="image/svg+xml">
+</head>
+<body>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
+      <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
+      <nav class="nav-links" id="navlinks" aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="launches.html">Launches</a>
+        <a href="astronauts.html">Astronauts</a>
+        <a href="rockets.html">Rockets</a>
+        <a href="solar-system.html">Solar System</a>
+        <a href="discoveries.html">Discoveries</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" class="wrap">
+    <section class="hero">
+      <h1>Follow space, <span>from Sputnik to Starship</span></h1>
+      <p class="lead">Space Curiosity tracks launch history, upcoming flights, the people who fly, the machines that lift them, and the worlds and ideas they reveal.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="launches.html">See launches</a>
+        <a class="btn" href="solar-system.html">Explore planets</a>
+        <a class="btn" href="discoveries.html">Browse discoveries</a>
+      </div>
+      <div class="stats" id="home-stats" aria-label="Site stats"></div>
+    </section>
+
+    <section aria-labelledby="next-h">
+      <div class="section-head">
+        <div><h2 id="next-h">Up next</h2><p id="next-source">Loading live launch data.</p></div>
+        <a class="btn btn-small" href="launches.html">All launches</a>
+      </div>
+      <div class="grid" id="home-next"></div>
+    </section>
+
+    <section aria-labelledby="feat-h">
+      <div class="section-head">
+        <div><h2 id="feat-h">Start exploring</h2><p>Four tracks, one shared timeline of curiosity.</p></div>
+      </div>
+      <div class="grid">
+        <article class="card reveal"><div class="card-body"><h3>Launch history</h3><p class="desc">From R-7 to SLS and Starship, with dates, vehicles, pads, and outcomes.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="launches.html">Open</a></div></div></article>
+        <article class="card reveal"><div class="card-body"><h3>Astronauts</h3><p class="desc">Crews across agencies and eras, with missions and bios.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="astronauts.html">Open</a></div></div></article>
+        <article class="card reveal"><div class="card-body"><h3>Rockets and engines</h3><p class="desc">Thrust, fuel, and design choices behind F-1, Merlin, Raptor, and more.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="rockets.html">Open</a></div></div></article>
+        <article class="card reveal"><div class="card-body"><h3>Worlds and discoveries</h3><p class="desc">Planets, moons, exoplanets, and the findings that changed the story.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="solar-system.html">Open</a></div></div></article>
+      </div>
+    </section>
+
+    <section aria-labelledby="fav-h">
+      <div class="section-head">
+        <div><h2 id="fav-h">Your saved items</h2><p>Stored only in this browser.</p></div>
+      </div>
+      <div id="home-favs" class="grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>Space Curiosity. Built with HTML, CSS, and JS only. Images load from remote public URLs.</div>
+      <nav aria-label="Footer"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+      <div>© <span id="year"></span> Space Curiosity</div>
+    </div>
+  </footer>
+
+  <script type="module">
+    import { initChrome } from "./js/main.js";
+    import { initStarfield } from "./js/starfield.js";
+    import { getUpcomingLaunches } from "./js/api.js";
+    import { loadJSON, observeReveals, bindFavorites, favButton, esc } from "./js/ui.js";
+    import { getFavorites } from "./js/store.js";
+
+    initChrome();
+    initStarfield();
+
+    const [history, astronauts, rockets, planets] = await Promise.all([
+      loadJSON("data/launches-history.json"),
+      loadJSON("data/astronauts.json"),
+      loadJSON("data/rockets.json"),
+      loadJSON("data/planets.json")
+    ]);
+
+    document.getElementById("home-stats").innerHTML = `
+      <div class="stat"><b>${history.launches.length}+</b><span>Historic launches</span></div>
+      <div class="stat"><b>${astronauts.astronauts.length}+</b><span>Astronaut profiles</span></div>
+      <div class="stat"><b>${rockets.rockets.length}+</b><span>Rockets tracked</span></div>
+      <div class="stat"><b>${planets.bodies.length}</b><span>Worlds listed</span></div>`;
+
+    const { launches, source } = await getUpcomingLaunches();
+    document.getElementById("next-source").textContent =
+      source === "live" ? "Live data, updated just now." : "Offline fallback data shown. Connect to refresh live.";
+    document.getElementById("home-next").innerHTML = launches.slice(0, 3).map((l) => `
+      <article class="card reveal visible">
+        ${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy">` : ""}
+        <div class="card-body">
+          <div class="meta"><span class="tag">${esc(l.provider ?? "")}</span><span class="tag-live tag">Upcoming</span></div>
+          <h3>${esc(l.name)}</h3>
+          <p class="desc">${esc(l.vehicle ?? "")} · ${l.date ? new Date(l.date).toLocaleDateString() : "Date TBD"}</p>
+          <div class="card-actions"><a class="btn btn-small" href="launches.html">Details</a>${favButton(l.id)}</div>
+        </div>
+      </article>`).join("") || `<div class="empty">No upcoming launches found.</div>`;
+
+    const favs = getFavorites();
+    const all = [
+      ...history.launches.map((x) => ({ id: x.id, name: x.name, kind: "Launch" })),
+      ...astronauts.astronauts.map((x) => ({ id: x.id, name: x.name, kind: "Astronaut" })),
+      ...rockets.rockets.map((x) => ({ id: x.id, name: x.name, kind: "Rocket" })),
+      ...planets.bodies.map((x) => ({ id: x.id, name: x.name, kind: "World" }))
+    ].filter((x) => favs.has(x.id));
+    document.getElementById("home-favs").innerHTML = all.length
+      ? all.map((x) => `<article class="card"><div class="card-body"><div class="meta"><span class="tag">${esc(x.kind)}</span></div><h3>${esc(x.name)}</h3><div class="card-actions">${favButton(x.id)}</div></div></article>`).join("")
+      : `<div class="empty">Nothing saved yet. Tap Save on any card.</div>`;
+
+    bindFavorites(document);
+    observeReveals(document);
+  </script>
+</body>
+</html>
