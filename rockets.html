@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rockets and Engines — Space Curiosity</title>
   <meta name="description" content="Rocket and engine specs, thrust, fuel, and comparisons.">
+  <meta name="theme-color" content="#05010f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -17,73 +22,105 @@
     <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
     <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
     <nav class="nav-links" id="navlinks" aria-label="Primary"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+      <button class="stars-toggle" id="stars-toggle" aria-pressed="true">Pause stars</button>
   </div></header>
   <main id="main" class="wrap">
-    <section class="hero"><h1>Rockets and engines</h1><p class="lead">How lift happens. Compare thrust, fuel, and status across landmark vehicles and motors.</p></section>
-    <div class="toolbar" role="search">
-      <input type="search" id="q" placeholder="Search rockets or engines" aria-label="Search rockets">
-      <select id="agency" aria-label="Filter by agency"><option value="">All makers</option></select>
-      <select id="fuel" aria-label="Filter by fuel"><option value="">Any fuel</option></select>
-    </div>
-    <section aria-labelledby="r-h"><div class="section-head"><div><h2 id="r-h">Rockets</h2><p id="r-count"></p></div></div><div class="grid" id="rockets"></div></section>
-    <section aria-labelledby="e-h"><div class="section-head"><div><h2 id="e-h">Engines</h2><p id="e-count"></p></div></div><div class="grid" id="engines"></div></section>
+    <section class="hero"><p class="kicker">Thrust, fuel, and design choices</p><h1>Rockets and engines</h1><p class="lead">How lift happens. Compare landmark vehicles and motors. One search filters both lists.</p></section>
+    <form class="toolbar" role="search" id="filters">
+      <div class="toolbar-field toolbar-field-grow">
+        <label for="q">Search</label>
+        <input type="search" id="q" name="q" placeholder="Vehicles, motors, fuels…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="toolbar-field">
+        <label for="agency">Maker</label>
+        <select id="agency" name="agency"><option value="">All makers</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label for="fuel">Fuel</label>
+        <select id="fuel" name="fuel"><option value="">Any fuel</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label for="fav">Saved</label>
+        <select id="fav" name="fav"><option value="">All</option><option value="only">Saved only</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label aria-hidden="true">&nbsp;</label>
+        <button class="toolbar-clear" type="button" id="clear">Clear</button>
+      </div>
+    </form>
+    <section aria-labelledby="r-h"><div class="section-head"><div><h2 id="r-h">Rockets</h2><p id="r-count" role="status" aria-live="polite"></p></div></div><div class="grid" id="rockets"></div></section>
+    <section aria-labelledby="e-h"><div class="section-head"><div><h2 id="e-h">Engines</h2><p id="e-count" role="status" aria-live="polite"></p></div></div><div class="grid" id="engines"></div></section>
   </main>
-  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Specs are rounded for learning, check agency sheets for flight planning.</div><div>© <span id="year"></span> Space Curiosity</div></div></footer>
+  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Built with HTML, CSS, and JS only. Images load from remote public URLs.</div><nav aria-label="Footer"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav><div>© <span id="year"></span> Space Curiosity</div></div></footer>
   <script type="module">
     import { initChrome } from "./js/main.js";
     import { initStarfield } from "./js/starfield.js";
-    import { loadJSON, bindFavorites, favButton, openDialog, esc } from "./js/ui.js";
+    import { loadJSON, bindFavorites, favButton, openDialog, syncFiltersToURL, readFiltersFromURL, imgFallback, esc } from "./js/ui.js";
+    import { isFavorite } from "./js/store.js";
     initChrome(); initStarfield();
+    const saved = readFiltersFromURL(["q", "agency", "fuel", "fav"]);
     const q = document.getElementById("q");
     const agency = document.getElementById("agency");
     const fuel = document.getElementById("fuel");
+    const fav = document.getElementById("fav");
+    q.value = saved.q; fav.value = saved.fav ?? "";
     const [rData, eData] = await Promise.all([loadJSON("data/rockets.json"), loadJSON("data/engines.json")]);
     const rockets = rData.rockets;
     const engines = eData.engines;
     [...new Set([...rockets.map((r) => r.agency), ...engines.map((e) => e.maker)])].sort().forEach((v) => {
-      const o = document.createElement("option"); o.value = v; o.textContent = v; agency.appendChild(o);
+      const o = document.createElement("option"); o.value = v; o.textContent = v;
+      if (saved.agency === v) o.selected = true;
+      agency.appendChild(o);
     });
+    if (saved.agency) agency.value = saved.agency;
     [...new Set([...rockets.map((r) => r.fuel), ...engines.map((e) => e.fuel)])].sort().forEach((v) => {
-      const o = document.createElement("option"); o.value = v; o.textContent = v; fuel.appendChild(o);
+      const o = document.createElement("option"); o.value = v; o.textContent = v;
+      if (saved.fuel === v) o.selected = true;
+      fuel.appendChild(o);
     });
+    if (saved.fuel) fuel.value = saved.fuel;
     function render() {
       const query = q.value.trim().toLowerCase();
+      syncFiltersToURL({ q: q.value.trim(), agency: agency.value, fuel: fuel.value, fav: fav.value });
       const rRows = rockets.filter((r) => {
         if (agency.value && r.agency !== agency.value) return false;
         if (fuel.value && r.fuel !== fuel.value) return false;
+        if (fav.value === "only" && !isFavorite(r.id)) return false;
         if (query && ![r.name, r.agency, r.fuel, r.summary].join(" ").toLowerCase().includes(query)) return false;
         return true;
       });
       const eRows = engines.filter((e) => {
         if (agency.value && e.maker !== agency.value) return false;
         if (fuel.value && e.fuel !== fuel.value) return false;
+        if (fav.value === "only" && !isFavorite(e.id)) return false;
         if (query && ![e.name, e.maker, e.fuel, e.summary, e.usedIn].join(" ").toLowerCase().includes(query)) return false;
         return true;
       });
-      document.getElementById("r-count").textContent = `${rRows.length} vehicles`;
-      document.getElementById("e-count").textContent = `${eRows.length} motors`;
+      document.getElementById("r-count").textContent = `${rRows.length} of ${rockets.length} vehicles shown.`;
+      document.getElementById("e-count").textContent = `${eRows.length} of ${engines.length} motors shown.`;
       const rEl = document.getElementById("rockets");
       rEl.innerHTML = rRows.map((r) => `
-        <article class="card">
-          ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy">` : ""}
+        <article class="card reveal visible">
+          ${r.image ? `<img src="${esc(r.image)}" alt="${esc(r.name)}" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}
           <div class="card-body">
             <div class="meta"><span class="tag">${esc(r.agency)}</span><span class="tag">${esc(r.status)}</span><span class="tag">${esc(r.fuel)}</span></div>
             <h3>${esc(r.name)}</h3>
             <p class="desc">${esc(r.summary)}</p>
             <table class="spec-table"><tr><th>Thrust</th><td>${r.thrustKN.toLocaleString()} kN</td></tr><tr><th>Height</th><td>${r.heightM} m</td></tr></table>
-            <div class="card-actions"><button class="btn btn-small" data-r="${esc(r.id)}">Specs</button>${favButton(r.id)}</div>
+            <div class="card-actions"><button class="btn btn-small" type="button" data-r="${esc(r.id)}">Details</button>${favButton(r.id)}</div>
           </div>
-        </article>`).join("") || `<div class="empty">No rockets match.</div>`;
+        </article>`).join("") || `<div class="empty"><strong>No rockets match.</strong>Try clearing search or filters.</div>`;
       const eEl = document.getElementById("engines");
       eEl.innerHTML = eRows.map((e) => `
-        <article class="card"><div class="card-body">
+        <article class="card reveal visible"><div class="card-body">
           <div class="meta"><span class="tag">${esc(e.maker)}</span><span class="tag">${esc(e.fuel)}</span></div>
           <h3>${esc(e.name)}</h3>
           <p class="desc">${esc(e.summary)} Used in ${esc(e.usedIn)}.</p>
           <table class="spec-table"><tr><th>Thrust</th><td>${e.thrustKN.toLocaleString()} kN</td></tr></table>
-          <div class="card-actions"><button class="btn btn-small" data-e="${esc(e.id)}">Specs</button>${favButton(e.id)}</div>
-        </div></article>`).join("") || `<div class="empty">No engines match.</div>`;
+          <div class="card-actions"><button class="btn btn-small" type="button" data-e="${esc(e.id)}">Details</button>${favButton(e.id)}</div>
+        </div></article>`).join("") || `<div class="empty"><strong>No engines match.</strong>Try clearing search or filters.</div>`;
       bindFavorites(document);
+      imgFallback(document);
     }
     document.addEventListener("click", (e) => {
       const r = e.target.closest("[data-r]");
@@ -97,7 +134,16 @@
         if (v) openDialog(`<div class="meta"><span class="tag">${esc(v.maker)}</span><span class="tag">${esc(v.fuel)}</span></div><h3>${esc(v.name)}</h3><table class="spec-table"><tr><th>Thrust</th><td>${v.thrustKN.toLocaleString()} kN</td></tr><tr><th>Used in</th><td>${esc(v.usedIn)}</td></tr></table><p>${esc(v.summary)}</p>`);
       }
     });
-    [q, agency, fuel].forEach((el) => el.addEventListener("input", render));
+    [q, agency, fuel, fav].forEach((el) => el.addEventListener("input", render));
+    fav.addEventListener("change", render);
+    document.getElementById("clear").addEventListener("click", () => {
+      q.value = ""; agency.value = ""; fuel.value = ""; fav.value = "";
+      render();
+      q.focus();
+    });
+    document.addEventListener("favorites-changed", () => {
+      if (fav.value === "only") render();
+    });
     render();
   </script>
 </body>

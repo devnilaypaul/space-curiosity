@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Space Curiosity — Explore Space History and Future</title>
   <meta name="description" content="Space Curiosity covers launch history, upcoming launches, astronauts, rockets, solar system, and discoveries.">
+  <meta name="theme-color" content="#05010f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -25,24 +30,25 @@
         <a href="solar-system.html">Solar System</a>
         <a href="discoveries.html">Discoveries</a>
       </nav>
+      <button class="stars-toggle" id="stars-toggle" aria-pressed="true">Pause stars</button>
     </div>
   </header>
 
   <main id="main" class="wrap">
-    <section class="hero">
-      <h1>Follow space, <span>from Sputnik to Starship</span></h1>
-      <p class="lead">Space Curiosity tracks launch history, upcoming flights, the people who fly, the machines that lift them, and the worlds and ideas they reveal.</p>
+    <section class="hero hero-cinematic">
+      <p class="kicker">Launches, crews, machines, worlds</p>
+      <h1>A field guide to <span>leaving Earth</span></h1>
+      <p class="lead">Space Curiosity follows real missions, crews, machines and worlds, from early test flights to upcoming launches, in one calm place to explore.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="launches.html">See launches</a>
-        <a class="btn" href="solar-system.html">Explore planets</a>
-        <a class="btn" href="discoveries.html">Browse discoveries</a>
+        <a class="btn btn-primary" href="launches.html">See upcoming launches</a>
+        <a class="btn" href="solar-system.html">Explore worlds</a>
       </div>
       <div class="stats" id="home-stats" aria-label="Site stats"></div>
     </section>
 
     <section aria-labelledby="next-h">
       <div class="section-head">
-        <div><h2 id="next-h">Up next</h2><p id="next-source">Loading live launch data.</p></div>
+        <div><h2 id="next-h">Up next</h2><p id="next-source" role="status">Loading live launch data…</p></div>
         <a class="btn btn-small" href="launches.html">All launches</a>
       </div>
       <div class="grid" id="home-next"></div>
@@ -52,11 +58,12 @@
       <div class="section-head">
         <div><h2 id="feat-h">Start exploring</h2><p>Four tracks, one shared timeline of curiosity.</p></div>
       </div>
-      <div class="grid">
-        <article class="card reveal"><div class="card-body"><h3>Launch history</h3><p class="desc">From R-7 to SLS and Starship, with dates, vehicles, pads, and outcomes.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="launches.html">Open</a></div></div></article>
-        <article class="card reveal"><div class="card-body"><h3>Astronauts</h3><p class="desc">Crews across agencies and eras, with missions and bios.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="astronauts.html">Open</a></div></div></article>
-        <article class="card reveal"><div class="card-body"><h3>Rockets and engines</h3><p class="desc">Thrust, fuel, and design choices behind F-1, Merlin, Raptor, and more.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="rockets.html">Open</a></div></div></article>
-        <article class="card reveal"><div class="card-body"><h3>Worlds and discoveries</h3><p class="desc">Planets, moons, exoplanets, and the findings that changed the story.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="solar-system.html">Open</a></div></div></article>
+      <div class="bento">
+        <article class="card reveal bento-large"><img src="https://images.unsplash.com/photo-1517976487492-5750f3195933?w=800&q=60&auto=format&fit=crop" alt="Rocket lifting off at dusk" loading="lazy" decoding="async" width="800" height="450"><div class="card-body"><h3>Launch history</h3><p class="desc">From early test flights to SLS and Starship, with dates, vehicles, pads, and outcomes.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="launches.html">Open launches</a></div></div></article>
+        <article class="card reveal"><img src="https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=60&auto=format&fit=crop" alt="Crew capsule above Earth" loading="lazy" decoding="async" width="800" height="450"><div class="card-body"><h3>Astronauts</h3><p class="desc">Crews across agencies and eras, with missions and bios.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="astronauts.html">Open crews</a></div></div></article>
+        <article class="card reveal"><img src="https://images.unsplash.com/photo-1516849841032-87cbac4d88f7?w=800&q=60&auto=format&fit=crop" alt="Rocket engine test at night" loading="lazy" decoding="async" width="800" height="450"><div class="card-body"><h3>Rockets and engines</h3><p class="desc">Thrust, fuel, and design choices behind landmark vehicles and motors.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="rockets.html">Open machines</a></div></div></article>
+        <article class="card reveal"><img src="https://images.unsplash.com/photo-1451187580459-43490279c429?w=800&q=60&auto=format&fit=crop" alt="Earth at night with city lights" loading="lazy" decoding="async" width="800" height="450"><div class="card-body"><h3>Worlds</h3><p class="desc">Planets, moons, and standout exoplanets, with distances and day lengths.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="solar-system.html">Open worlds</a></div></div></article>
+        <article class="card reveal"><img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800&q=60&auto=format&fit=crop" alt="Distant galaxy in deep space" loading="lazy" decoding="async" width="800" height="450"><div class="card-body"><h3>Discoveries</h3><p class="desc">Ideas and observations that rewrote the story.</p><div class="card-actions"><a class="btn btn-small btn-primary" href="discoveries.html">Open discoveries</a></div></div></article>
       </div>
     </section>
 
@@ -64,6 +71,7 @@
       <div class="section-head">
         <div><h2 id="fav-h">Your saved items</h2><p>Stored only in this browser.</p></div>
       </div>
+      <div class="saved-bar"><span id="fav-count" role="status"></span><button class="toolbar-clear" id="fav-clear" type="button">Clear saved</button></div>
       <div id="home-favs" class="grid"></div>
     </section>
   </main>
@@ -80,49 +88,81 @@
     import { initChrome } from "./js/main.js";
     import { initStarfield } from "./js/starfield.js";
     import { getUpcomingLaunches } from "./js/api.js";
-    import { loadJSON, observeReveals, bindFavorites, favButton, esc } from "./js/ui.js";
-    import { getFavorites } from "./js/store.js";
+    import { loadJSON, observeReveals, bindFavorites, favButton, openDialog, esc, imgFallback } from "./js/ui.js";
+    import { getFavorites, clearFavorites } from "./js/store.js";
 
     initChrome();
     initStarfield();
 
-    const [history, astronauts, rockets, planets] = await Promise.all([
+    const dateFmt = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
+    const fmtDate = (d) => {
+      if (!d) return "Date TBD";
+      const t = new Date(d);
+      return Number.isNaN(t.getTime()) ? "Date TBD" : dateFmt.format(t);
+    };
+
+    const [history, astronauts, rockets, planets, engines, discoveries] = await Promise.all([
       loadJSON("data/launches-history.json"),
       loadJSON("data/astronauts.json"),
       loadJSON("data/rockets.json"),
-      loadJSON("data/planets.json")
+      loadJSON("data/planets.json"),
+      loadJSON("data/engines.json"),
+      loadJSON("data/discoveries.json")
     ]);
 
     document.getElementById("home-stats").innerHTML = `
       <div class="stat"><b>${history.launches.length}+</b><span>Historic launches</span></div>
       <div class="stat"><b>${astronauts.astronauts.length}+</b><span>Astronaut profiles</span></div>
-      <div class="stat"><b>${rockets.rockets.length}+</b><span>Rockets tracked</span></div>
+      <div class="stat"><b>${rockets.rockets.length + engines.engines.length}+</b><span>Machines tracked</span></div>
       <div class="stat"><b>${planets.bodies.length}</b><span>Worlds listed</span></div>`;
 
     const { launches, source } = await getUpcomingLaunches();
-    document.getElementById("next-source").textContent =
-      source === "live" ? "Live data, updated just now." : "Offline fallback data shown. Connect to refresh live.";
-    document.getElementById("home-next").innerHTML = launches.slice(0, 3).map((l) => `
+    const sourceEl = document.getElementById("next-source");
+    if (source === "live") sourceEl.textContent = "Live data, updated just now.";
+    else if (source === "cache") sourceEl.textContent = "Live feed paused. Showing your last cached launches…";
+    else sourceEl.textContent = "You are offline. Showing local fallback launches…";
+    const upcomingEl = document.getElementById("home-next");
+    upcomingEl.innerHTML = launches.slice(0, 3).map((l) => `
       <article class="card reveal visible">
-        ${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy">` : ""}
+        ${l.image ? `<img src="${esc(l.image)}" alt="" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}
         <div class="card-body">
-          <div class="meta"><span class="tag">${esc(l.provider ?? "")}</span><span class="tag-live tag">Upcoming</span></div>
+          <div class="meta"><span class="tag">${esc(l.provider ?? "")}</span><span class="${source === "live" ? "tag-live" : "tag-cache"} tag">${source === "live" ? "Live" : source === "cache" ? "Cached" : "Fallback"}</span></div>
           <h3>${esc(l.name)}</h3>
-          <p class="desc">${esc(l.vehicle ?? "")} · ${l.date ? new Date(l.date).toLocaleDateString() : "Date TBD"}</p>
-          <div class="card-actions"><a class="btn btn-small" href="launches.html">Details</a>${favButton(l.id)}</div>
+          <p class="desc">${esc(l.vehicle ?? "")} · ${esc(fmtDate(l.date))}</p>
+          <div class="card-actions"><button class="btn btn-small" data-up="${esc(l.id)}" type="button">Details</button>${favButton(l.id)}</div>
         </div>
-      </article>`).join("") || `<div class="empty">No upcoming launches found.</div>`;
+      </article>`).join("") || `<div class="empty"><strong>No upcoming launches found.</strong>Check the full list for history.</div>`;
+    upcomingEl.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-up]");
+      if (!b) return;
+      const l = launches.find((x) => x.id === b.getAttribute("data-up"));
+      if (l) openDialog(`<div class="meta"><span class="tag">${esc(l.provider ?? "")}</span><span class="tag">${esc(l.vehicle ?? "")}</span></div><h3>${esc(l.name)}</h3><p>${esc(l.details ?? "")} Pad: ${esc(l.pad ?? "Unknown")}. Date: ${esc(fmtDate(l.date))}.</p>`);
+    });
 
-    const favs = getFavorites();
-    const all = [
-      ...history.launches.map((x) => ({ id: x.id, name: x.name, kind: "Launch" })),
-      ...astronauts.astronauts.map((x) => ({ id: x.id, name: x.name, kind: "Astronaut" })),
-      ...rockets.rockets.map((x) => ({ id: x.id, name: x.name, kind: "Rocket" })),
-      ...planets.bodies.map((x) => ({ id: x.id, name: x.name, kind: "World" }))
-    ].filter((x) => favs.has(x.id));
-    document.getElementById("home-favs").innerHTML = all.length
-      ? all.map((x) => `<article class="card"><div class="card-body"><div class="meta"><span class="tag">${esc(x.kind)}</span></div><h3>${esc(x.name)}</h3><div class="card-actions">${favButton(x.id)}</div></div></article>`).join("")
-      : `<div class="empty">Nothing saved yet. Tap Save on any card.</div>`;
+    function renderFavs() {
+      const favs = getFavorites();
+      const all = [
+        ...history.launches.map((x) => ({ id: x.id, name: x.name, kind: "Launch", href: "launches.html" })),
+        ...launches.map((x) => ({ id: x.id, name: x.name, kind: "Upcoming", href: "launches.html" })),
+        ...astronauts.astronauts.map((x) => ({ id: x.id, name: x.name, kind: "Astronaut", href: "astronauts.html" })),
+        ...rockets.rockets.map((x) => ({ id: x.id, name: x.name, kind: "Rocket", href: "rockets.html" })),
+        ...engines.engines.map((x) => ({ id: x.id, name: x.name, kind: "Engine", href: "rockets.html" })),
+        ...planets.bodies.map((x) => ({ id: x.id, name: x.name, kind: "World", href: "solar-system.html" })),
+        ...discoveries.discoveries.map((x) => ({ id: x.id, name: x.title, kind: "Discovery", href: "discoveries.html" }))
+      ].filter((x) => favs.has(x.id));
+      document.getElementById("fav-count").textContent = all.length ? `${all.length} saved` : "";
+      document.getElementById("home-favs").innerHTML = all.length
+        ? all.map((x) => `<article class="card"><div class="card-body"><div class="meta"><span class="tag">${esc(x.kind)}</span></div><h3>${esc(x.name)}</h3><div class="card-actions"><a class="btn btn-small" href="${esc(x.href)}">Open</a>${favButton(x.id)}</div></div></article>`).join("")
+        : `<div class="empty"><strong>Nothing saved yet.</strong>Tap Save on any card and it shows up here.</div>`;
+      bindFavorites(document);
+    }
+    document.getElementById("fav-clear").addEventListener("click", () => {
+      clearFavorites();
+      renderFavs();
+    });
+    document.addEventListener("favorites-changed", renderFavs);
+    renderFavs();
+    imgFallback(document);
 
     bindFavorites(document);
     observeReveals(document);

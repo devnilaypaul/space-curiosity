@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Astronauts — Space Curiosity</title>
   <meta name="description" content="Astronaut profiles across agencies and eras.">
+  <meta name="theme-color" content="#05010f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -17,31 +22,48 @@
     <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
     <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
     <nav class="nav-links" id="navlinks" aria-label="Primary"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+      <button class="stars-toggle" id="stars-toggle" aria-pressed="true">Pause stars</button>
   </div></header>
   <main id="main" class="wrap">
-    <section class="hero"><h1>Astronauts</h1><p class="lead">People behind the missions. Search, filter by agency or status, open a card for missions.</p></section>
-    <div class="toolbar" role="search">
-      <input type="search" id="q" placeholder="Search name or mission" aria-label="Search astronauts">
-      <select id="agency" aria-label="Filter by agency"><option value="">All agencies</option></select>
-      <select id="status" aria-label="Filter by status"><option value="">Any status</option><option>Active</option><option>Retired</option><option>Deceased</option></select>
-      <select id="fav" aria-label="Filter favorites"><option value="">All</option><option value="only">Saved only</option></select>
-    </div>
-    <div class="result-count" id="count"></div>
+    <section class="hero"><p class="kicker">Crews across agencies and eras</p><h1>Astronauts</h1><p class="lead">The people behind the missions. Search, filter by agency or status, open a card for missions.</p></section>
+    <form class="toolbar" role="search" id="filters">
+      <div class="toolbar-field toolbar-field-grow">
+        <label for="q">Search</label>
+        <input type="search" id="q" name="q" placeholder="Names, missions…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="toolbar-field">
+        <label for="agency">Agency</label>
+        <select id="agency" name="agency"><option value="">All agencies</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label for="status">Status</label>
+        <select id="status" name="status"><option value="">Any status</option><option>Active</option><option>Retired</option><option>Deceased</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label for="fav">Saved</label>
+        <select id="fav" name="fav"><option value="">All</option><option value="only">Saved only</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label aria-hidden="true">&nbsp;</label>
+        <button class="toolbar-clear" type="button" id="clear">Clear</button>
+      </div>
+    </form>
+    <div class="result-count" id="count" role="status" aria-live="polite"></div>
     <div class="grid" id="grid"></div>
   </main>
-  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Data from local JSON, editable in data folder.</div><div>© <span id="year"></span> Space Curiosity</div></div></footer>
+  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Built with HTML, CSS, and JS only. Images load from remote public URLs.</div><nav aria-label="Footer"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav><div>© <span id="year"></span> Space Curiosity</div></div></footer>
   <script type="module">
     import { initChrome } from "./js/main.js";
     import { initStarfield } from "./js/starfield.js";
-    import { loadJSON, observeReveals, bindFavorites, favButton, openDialog, syncFiltersToURL, readFiltersFromURL, esc } from "./js/ui.js";
+    import { loadJSON, observeReveals, bindFavorites, favButton, openDialog, syncFiltersToURL, readFiltersFromURL, imgFallback, esc } from "./js/ui.js";
     import { isFavorite } from "./js/store.js";
     initChrome(); initStarfield();
-    const saved = readFiltersFromURL(["q", "agency", "status"]);
+    const saved = readFiltersFromURL(["q", "agency", "status", "fav"]);
     const q = document.getElementById("q");
     const agency = document.getElementById("agency");
     const status = document.getElementById("status");
     const fav = document.getElementById("fav");
-    q.value = saved.q; agency.value = saved.agency; status.value = saved.status;
+    q.value = saved.q; agency.value = saved.agency; status.value = saved.status; fav.value = saved.fav ?? "";
     const data = await loadJSON("data/astronauts.json");
     const rows0 = data.astronauts;
     [...new Set(rows0.map((a) => a.agency))].sort().forEach((v) => {
@@ -50,11 +72,11 @@
       agency.appendChild(o);
     });
     function detail(a) {
-      return `${a.image ? `<img src="${esc(a.image)}" alt="" loading="lazy">` : ""}<div class="meta"><span class="tag">${esc(a.agency)}</span><span class="tag">${esc(a.status)}</span><span class="tag">First flight ${esc(a.firstFlight)}</span></div><h3>${esc(a.name)}</h3><p>${esc(a.bio)}</p><table class="spec-table"><tr><th>Missions</th><td>${a.missions.map(esc).join(", ")}</td></tr></table>`;
+      return `${a.image ? `<img src="${esc(a.image)}" alt="" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}<div class="meta"><span class="tag">${esc(a.agency)}</span><span class="tag">${esc(a.status)}</span><span class="tag">First flight ${esc(a.firstFlight)}</span></div><h3>${esc(a.name)}</h3><p>${esc(a.bio)}</p><table class="spec-table"><tr><th>Missions</th><td>${a.missions.map(esc).join(", ")}</td></tr></table>`;
     }
     function render() {
       const query = q.value.trim().toLowerCase();
-      syncFiltersToURL({ q: q.value.trim(), agency: agency.value, status: status.value });
+      syncFiltersToURL({ q: q.value.trim(), agency: agency.value, status: status.value, fav: fav.value });
       const rows = rows0.filter((a) => {
         if (agency.value && a.agency !== agency.value) return false;
         if (status.value && a.status !== status.value) return false;
@@ -66,15 +88,16 @@
       const grid = document.getElementById("grid");
       grid.innerHTML = rows.map((a) => `
         <article class="card reveal visible">
-          ${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.name)}" loading="lazy">` : ""}
+          ${a.image ? `<img src="${esc(a.image)}" alt="${esc(a.name)}" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}
           <div class="card-body">
             <div class="meta"><span class="tag">${esc(a.agency)}</span><span class="tag">${esc(a.status)}</span></div>
             <h3>${esc(a.name)}</h3>
             <p class="desc">${esc(a.bio)}</p>
-            <div class="card-actions"><button class="btn btn-small" data-id="${esc(a.id)}">Details</button>${favButton(a.id)}</div>
+            <div class="card-actions"><button class="btn btn-small" type="button" data-id="${esc(a.id)}">Details</button>${favButton(a.id)}</div>
           </div>
-        </article>`).join("") || `<div class="empty">No astronauts match those filters.</div>`;
+        </article>`).join("") || `<div class="empty"><strong>No astronauts match those filters.</strong>Try clearing search or filters.</div>`;
       bindFavorites(grid);
+      imgFallback(grid);
     }
     document.getElementById("grid").addEventListener("click", (e) => {
       const b = e.target.closest("[data-id]");
@@ -83,6 +106,15 @@
       if (a) openDialog(detail(a));
     });
     [q, agency, status, fav].forEach((el) => el.addEventListener("input", render));
+    fav.addEventListener("change", render);
+    document.getElementById("clear").addEventListener("click", () => {
+      q.value = ""; agency.value = ""; status.value = ""; fav.value = "";
+      render();
+      q.focus();
+    });
+    document.addEventListener("favorites-changed", () => {
+      if (fav.value === "only") render();
+    });
     render(); observeReveals(document);
   </script>
 </body>

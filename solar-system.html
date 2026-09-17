@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Solar System — Space Curiosity</title>
   <meta name="description" content="Star, planets, dwarf worlds, and notable exoplanets.">
+  <meta name="theme-color" content="#05010f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -17,57 +22,91 @@
     <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
     <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
     <nav class="nav-links" id="navlinks" aria-label="Primary"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+      <button class="stars-toggle" id="stars-toggle" aria-pressed="true">Pause stars</button>
   </div></header>
   <main id="main" class="wrap">
-    <section class="hero"><h1>Solar system and beyond</h1><p class="lead">Our star, its planets, plus one standout exoplanet system to show how common worlds are.</p></section>
-    <div class="toolbar" role="search">
-      <input type="search" id="q" placeholder="Search worlds" aria-label="Search worlds">
-      <select id="type" aria-label="Filter by type"><option value="">All types</option></select>
-    </div>
-    <div class="result-count" id="count"></div>
+    <section class="hero"><p class="kicker">Our star and its neighbors</p><h1>Solar system and beyond</h1><p class="lead">Our star, its planets, plus one standout exoplanet system to show how common worlds are.</p></section>
+    <form class="toolbar" role="search" id="filters">
+      <div class="toolbar-field toolbar-field-grow">
+        <label for="q">Search</label>
+        <input type="search" id="q" name="q" placeholder="Worlds, types…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="toolbar-field">
+        <label for="type">Type</label>
+        <select id="type" name="type"><option value="">All types</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label for="fav">Saved</label>
+        <select id="fav" name="fav"><option value="">All</option><option value="only">Saved only</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label aria-hidden="true">&nbsp;</label>
+        <button class="toolbar-clear" type="button" id="clear">Clear</button>
+      </div>
+    </form>
+    <div class="result-count" id="count" role="status" aria-live="polite"></div>
     <div class="grid" id="grid"></div>
   </main>
-  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Distances in AU where known.</div><div>© <span id="year"></span> Space Curiosity</div></div></footer>
+  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Built with HTML, CSS, and JS only. Images load from remote public URLs.</div><nav aria-label="Footer"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav><div>© <span id="year"></span> Space Curiosity</div></div></footer>
   <script type="module">
     import { initChrome } from "./js/main.js";
     import { initStarfield } from "./js/starfield.js";
-    import { loadJSON, bindFavorites, favButton, openDialog, esc } from "./js/ui.js";
+    import { loadJSON, bindFavorites, favButton, openDialog, syncFiltersToURL, readFiltersFromURL, imgFallback, esc } from "./js/ui.js";
+    import { isFavorite } from "./js/store.js";
     initChrome(); initStarfield();
+    const saved = readFiltersFromURL(["q", "type", "fav"]);
     const q = document.getElementById("q");
     const type = document.getElementById("type");
+    const fav = document.getElementById("fav");
+    q.value = saved.q; fav.value = saved.fav ?? "";
     const data = await loadJSON("data/planets.json");
     const rows0 = data.bodies;
-    [...new Set(rows0.map((b) => b.type))].forEach((v) => {
-      const o = document.createElement("option"); o.value = v; o.textContent = v; type.appendChild(o);
+    [...new Set(rows0.map((b) => b.type))].sort().forEach((v) => {
+      const o = document.createElement("option"); o.value = v; o.textContent = v;
+      if (saved.type === v) o.selected = true;
+      type.appendChild(o);
     });
+    if (saved.type) type.value = saved.type;
     function render() {
       const query = q.value.trim().toLowerCase();
+      syncFiltersToURL({ q: q.value.trim(), type: type.value, fav: fav.value });
       const rows = rows0.filter((b) => {
         if (type.value && b.type !== type.value) return false;
-        if (query && [b.name, b.summary, b.type].join(" ").toLowerCase().includes(query)) return true;
-        return !query;
+        if (fav.value === "only" && !isFavorite(b.id)) return false;
+        if (query && ![b.name, b.summary, b.type].join(" ").toLowerCase().includes(query)) return false;
+        return true;
       });
-      document.getElementById("count").textContent = `${rows.length} worlds shown.`;
+      document.getElementById("count").textContent = `${rows.length} of ${rows0.length} worlds shown.`;
       const grid = document.getElementById("grid");
       grid.innerHTML = rows.map((b) => `
-        <article class="card">
-          ${b.image ? `<img src="${esc(b.image)}" alt="${esc(b.name)}" loading="lazy">` : ""}
+        <article class="card reveal visible">
+          ${b.image ? `<img src="${esc(b.image)}" alt="${esc(b.name)}" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}
           <div class="card-body">
             <div class="meta"><span class="tag">${esc(b.type)}</span>${b.distanceAU !== null ? `<span class="tag">${b.distanceAU} AU</span>` : ""}<span class="tag">${b.moons} moons</span></div>
             <h3>${esc(b.name)}</h3>
             <p class="desc">${esc(b.summary)}</p>
-            <div class="card-actions"><button class="btn btn-small" data-id="${esc(b.id)}">Facts</button>${favButton(b.id)}</div>
+            <div class="card-actions"><button class="btn btn-small" type="button" data-id="${esc(b.id)}">Details</button>${favButton(b.id)}</div>
           </div>
-        </article>`).join("");
+        </article>`).join("") || `<div class="empty"><strong>No worlds match those filters.</strong>Try clearing search or filters.</div>`;
       bindFavorites(grid);
+      imgFallback(grid);
     }
     document.getElementById("grid").addEventListener("click", (e) => {
       const b = e.target.closest("[data-id]");
       if (!b) return;
       const v = rows0.find((x) => x.id === b.getAttribute("data-id"));
-      if (v) openDialog(`${v.image ? `<img src="${esc(v.image)}" alt="" loading="lazy">` : ""}<div class="meta"><span class="tag">${esc(v.type)}</span></div><h3>${esc(v.name)}</h3><table class="spec-table"><tr><th>Day</th><td>${esc(v.dayLength)}</td></tr><tr><th>Year</th><td>${esc(v.yearLength)}</td></tr><tr><th>Moons</th><td>${v.moons}</td></tr></table><p>${esc(v.summary)}</p>`);
+      if (v) openDialog(`${v.image ? `<img src="${esc(v.image)}" alt="" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}<div class="meta"><span class="tag">${esc(v.type)}</span></div><h3>${esc(v.name)}</h3><table class="spec-table"><tr><th>Day</th><td>${esc(v.dayLength)}</td></tr><tr><th>Year</th><td>${esc(v.yearLength)}</td></tr><tr><th>Moons</th><td>${v.moons}</td></tr></table><p>${esc(v.summary)}</p>`);
     });
-    [q, type].forEach((el) => el.addEventListener("input", render));
+    [q, type, fav].forEach((el) => el.addEventListener("input", render));
+    fav.addEventListener("change", render);
+    document.getElementById("clear").addEventListener("click", () => {
+      q.value = ""; type.value = ""; fav.value = "";
+      render();
+      q.focus();
+    });
+    document.addEventListener("favorites-changed", () => {
+      if (fav.value === "only") render();
+    });
     render();
   </script>
 </body>

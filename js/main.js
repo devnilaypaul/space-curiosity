@@ -8,6 +8,22 @@ export function initChrome() {
     btn.addEventListener("click", () => {
       const open = links.classList.toggle("open");
       btn.setAttribute("aria-expanded", String(open));
+      btn.textContent = open ? "Close" : "Menu";
+    });
+    links.addEventListener("click", (e) => {
+      if (e.target.closest("a") && links.classList.contains("open")) {
+        links.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
+        btn.textContent = "Menu";
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && links.classList.contains("open")) {
+        links.classList.remove("open");
+        btn.setAttribute("aria-expanded", "false");
+        btn.textContent = "Menu";
+        btn.focus();
+      }
     });
   }
 

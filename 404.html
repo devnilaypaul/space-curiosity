@@ -4,11 +4,56 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Not found — Space Curiosity</title>
+  <meta name="description" content="That page drifted off course. Find launches, astronauts, rockets, worlds and discoveries.">
+  <meta name="theme-color" content="#05010f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="assets/icons.svg" type="image/svg+xml">
 </head>
 <body>
-  <main class="wrap hero"><h1>Lost in space</h1><p class="lead">That page does not exist.</p><p><a class="btn btn-primary" href="index.html">Back home</a></p></main>
+  <canvas id="stars" aria-hidden="true"></canvas>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
+      <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
+      <nav class="nav-links" id="navlinks" aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="launches.html">Launches</a>
+        <a href="astronauts.html">Astronauts</a>
+        <a href="rockets.html">Rockets</a>
+        <a href="solar-system.html">Solar System</a>
+        <a href="discoveries.html">Discoveries</a>
+      </nav>
+      <button class="stars-toggle" id="stars-toggle" aria-pressed="true">Pause stars</button>
+    </div>
+  </header>
+  <main id="main" class="wrap hero hero-cinematic">
+    <p class="kicker">Off course</p>
+    <h1>Lost in space</h1>
+    <p class="lead">That page does not exist. Pick a track below and keep exploring.</p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="index.html">Back home</a>
+      <a class="btn" href="launches.html">See launches</a>
+      <a class="btn" href="discoveries.html">Browse discoveries</a>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>Space Curiosity. Built with HTML, CSS, and JS only. Images load from remote public URLs.</div>
+      <nav aria-label="Footer"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+      <div>© <span id="year"></span> Space Curiosity</div>
+    </div>
+  </footer>
+  <script type="module">
+    import { initChrome } from "./js/main.js";
+    import { initStarfield } from "./js/starfield.js";
+    initChrome();
+    initStarfield();
+  </script>
 </body>
 </html>

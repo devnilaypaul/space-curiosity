@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Discoveries — Space Curiosity</title>
   <meta name="description" content="Timeline of discoveries that shaped space science.">
+  <meta name="theme-color" content="#05010f">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/styles.css">
@@ -17,55 +22,90 @@
     <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">✦</span> Space Curiosity</a>
     <button class="menu-btn" aria-expanded="false" aria-controls="navlinks">Menu</button>
     <nav class="nav-links" id="navlinks" aria-label="Primary"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav>
+      <button class="stars-toggle" id="stars-toggle" aria-pressed="true">Pause stars</button>
   </div></header>
   <main id="main" class="wrap">
-    <section class="hero"><h1>Discoveries</h1><p class="lead">Ideas and observations that rewrote the story, from heliocentrism to gravitational waves.</p></section>
-    <div class="toolbar" role="search">
-      <input type="search" id="q" placeholder="Search discoveries" aria-label="Search discoveries">
-      <select id="cat" aria-label="Filter by category"><option value="">All categories</option></select>
-    </div>
-    <div class="result-count" id="count"></div>
+    <section class="hero"><p class="kicker">Ideas that rewrote the story</p><h1>Discoveries</h1><p class="lead">Ideas and observations that changed how we see the sky, from early models to gravitational waves.</p></section>
+    <form class="toolbar" role="search" id="filters">
+      <div class="toolbar-field toolbar-field-grow">
+        <label for="q">Search</label>
+        <input type="search" id="q" name="q" placeholder="Ideas, people, categories…" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="toolbar-field">
+        <label for="cat">Category</label>
+        <select id="cat" name="cat"><option value="">All categories</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label for="fav">Saved</label>
+        <select id="fav" name="fav"><option value="">All</option><option value="only">Saved only</option></select>
+      </div>
+      <div class="toolbar-field">
+        <label aria-hidden="true">&nbsp;</label>
+        <button class="toolbar-clear" type="button" id="clear">Clear</button>
+      </div>
+    </form>
+    <div class="result-count" id="count" role="status" aria-live="polite"></div>
     <div class="timeline" id="list"></div>
   </main>
-  <footer class="site-footer"><div class="wrap"><div>Space Curiosity.</div><div>© <span id="year"></span> Space Curiosity</div></div></footer>
+  <footer class="site-footer"><div class="wrap"><div>Space Curiosity. Built with HTML, CSS, and JS only. Images load from remote public URLs.</div><nav aria-label="Footer"><a href="index.html">Home</a><a href="launches.html">Launches</a><a href="astronauts.html">Astronauts</a><a href="rockets.html">Rockets</a><a href="solar-system.html">Solar System</a><a href="discoveries.html">Discoveries</a></nav><div>© <span id="year"></span> Space Curiosity</div></div></footer>
   <script type="module">
     import { initChrome } from "./js/main.js";
     import { initStarfield } from "./js/starfield.js";
-    import { loadJSON, bindFavorites, favButton, openDialog, esc } from "./js/ui.js";
+    import { loadJSON, bindFavorites, favButton, openDialog, syncFiltersToURL, readFiltersFromURL, imgFallback, esc } from "./js/ui.js";
+    import { isFavorite } from "./js/store.js";
     initChrome(); initStarfield();
+    const saved = readFiltersFromURL(["q", "cat", "fav"]);
     const q = document.getElementById("q");
     const cat = document.getElementById("cat");
+    const fav = document.getElementById("fav");
+    q.value = saved.q; fav.value = saved.fav ?? "";
     const data = await loadJSON("data/discoveries.json");
     const rows0 = data.discoveries;
     [...new Set(rows0.map((d) => d.category))].sort().forEach((v) => {
-      const o = document.createElement("option"); o.value = v; o.textContent = v; cat.appendChild(o);
+      const o = document.createElement("option"); o.value = v; o.textContent = v;
+      if (saved.cat === v) o.selected = true;
+      cat.appendChild(o);
     });
+    if (saved.cat) cat.value = saved.cat;
     function render() {
       const query = q.value.trim().toLowerCase();
+      syncFiltersToURL({ q: q.value.trim(), cat: cat.value, fav: fav.value });
       const rows = rows0.filter((d) => {
         if (cat.value && d.category !== cat.value) return false;
-        if (query && [d.title, d.summary, d.credit].join(" ").toLowerCase().includes(query)) return true;
-        return !query;
+        if (fav.value === "only" && !isFavorite(d.id)) return false;
+        if (query && ![d.title, d.summary, d.credit].join(" ").toLowerCase().includes(query)) return false;
+        return true;
       });
-      document.getElementById("count").textContent = `${rows.length} discoveries shown.`;
+      document.getElementById("count").textContent = `${rows.length} of ${rows0.length} discoveries shown.`;
       const el = document.getElementById("list");
       el.innerHTML = rows.map((d) => `
-        <article class="t-item">
+        <article class="t-item reveal visible">
+          ${d.image ? `<img src="${esc(d.image)}" alt="" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:12px;margin-bottom:0.8rem;">` : ""}
           <time>${esc(d.date)}</time>
           <h3>${esc(d.title)}</h3>
           <div class="meta"><span class="tag">${esc(d.category)}</span><span class="tag">${esc(d.credit)}</span></div>
           <p>${esc(d.summary)}</p>
-          <div class="card-actions"><button class="btn btn-small" data-id="${esc(d.id)}">More</button>${favButton(d.id)}</div>
-        </article>`).join("") || `<div class="empty">No discoveries match.</div>`;
+          <div class="card-actions"><button class="btn btn-small" type="button" data-id="${esc(d.id)}">Details</button>${favButton(d.id)}</div>
+        </article>`).join("") || `<div class="empty"><strong>No discoveries match.</strong>Try clearing search or filters.</div>`;
       bindFavorites(el);
+      imgFallback(el);
     }
     document.getElementById("list").addEventListener("click", (e) => {
       const b = e.target.closest("[data-id]");
       if (!b) return;
       const v = rows0.find((x) => x.id === b.getAttribute("data-id"));
-      if (v) openDialog(`<div class="meta"><span class="tag">${esc(v.category)}</span><span class="tag">${esc(v.date)}</span></div><h3>${esc(v.title)}</h3><p>Credit: ${esc(v.credit)}. ${esc(v.summary)}</p>`);
+      if (v) openDialog(`${v.image ? `<img src="${esc(v.image)}" alt="" loading="lazy" decoding="async" width="800" height="450" onerror="this.remove()">` : ""}<div class="meta"><span class="tag">${esc(v.category)}</span><span class="tag">${esc(v.date)}</span></div><h3>${esc(v.title)}</h3><p>Credit: ${esc(v.credit)}. ${esc(v.summary)}</p>`);
     });
-    [q, cat].forEach((el) => el.addEventListener("input", render));
+    [q, cat, fav].forEach((el) => el.addEventListener("input", render));
+    fav.addEventListener("change", render);
+    document.getElementById("clear").addEventListener("click", () => {
+      q.value = ""; cat.value = ""; fav.value = "";
+      render();
+      q.focus();
+    });
+    document.addEventListener("favorites-changed", () => {
+      if (fav.value === "only") render();
+    });
     render();
   </script>
 </body>

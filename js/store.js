@@ -17,5 +17,12 @@ export function toggleFavorite(id) {
   if (favs.has(id)) favs.delete(id);
   else favs.add(id);
   localStorage.setItem(KEY, JSON.stringify([...favs]));
-  return favs.has(id);
+  const now = favs.has(id);
+  document.dispatchEvent(new CustomEvent("favorites-changed", { detail: { id, saved: now } }));
+  return now;
+}
+
+export function clearFavorites() {
+  localStorage.setItem(KEY, JSON.stringify([]));
+  document.dispatchEvent(new CustomEvent("favorites-changed", { detail: { cleared: true } }));
 }
