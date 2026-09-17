@@ -27,7 +27,9 @@ export function initChrome() {
     });
   }
 
-  const path = location.pathname.split("/").pop() || "index.html";
+  // Match clean URLs (/launches) as well as file URLs (launches.html).
+  const seg = location.pathname.split("/").filter(Boolean).pop() || "index.html";
+  const path = seg.includes(".") ? seg : `${seg}.html`;
   document.querySelectorAll(".nav-links a").forEach((a) => {
     const href = a.getAttribute("href");
     if (href === path) a.setAttribute("aria-current", "page");

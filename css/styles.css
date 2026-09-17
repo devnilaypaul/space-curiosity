@@ -63,7 +63,6 @@ body {
 .btn-primary { background: linear-gradient(92deg, #38bdf8, #a78bfa); color: #05010f; border: 0; }
 .btn-primary:hover { filter: brightness(1.06); background: linear-gradient(92deg, #38bdf8, #a78bfa); }
 .btn-small { padding: 0.5rem 0.85rem; font-size: 0.87rem; min-height: 40px; }
-.btn-ghost { background: transparent; }
 
 /* Stats */
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin: 2rem 0; }

@@ -14,14 +14,6 @@
   --accent-2: #c084fc;
   --gold: #fbbf24;
   --good: #34d399;
-  --danger: #f87171;
-
-  /* Legacy aliases, kept so old rules keep working during rollout */
-  --bg: var(--void);
-  --bg-soft: var(--nebula);
-  --surface: var(--glass);
-  --surface-solid: var(--glass-solid);
-  --warn: var(--gold);
 
   --radius: 16px;
   --radius-sm: 10px;
@@ -29,18 +21,10 @@
 
   --font-display: "Space Grotesk", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
   --font-body: "Inter", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font: var(--font-body);
 
   --max: 1160px;
   --shadow: 0 24px 70px rgb(0 0 0 / 0.55);
 
-  --space-1: 0.4rem;
-  --space-2: 0.7rem;
-  --space-3: 1rem;
-  --space-4: 1.5rem;
-  --space-5: 2.5rem;
-
-  --motion-fast: 160ms;
   --motion-base: 260ms;
   --motion-slow: 560ms;
 

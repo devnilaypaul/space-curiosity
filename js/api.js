@@ -50,14 +50,24 @@ function normalize(url, raw) {
     }));
   }
   const list = raw.results ?? raw.launches ?? [];
-  return list.slice(0, 12).map((l) => ({
-    id: `ll2-${l.id ?? l.name}`,
-    name: l.name ?? "Upcoming launch",
-    date: l.net ?? l.window_start ?? null,
-    provider: l.launch_service_provider?.name ?? "Unknown provider",
-    vehicle: l.rocket?.configuration?.name ?? "Unknown vehicle",
-    pad: l.pad?.name ?? "Unknown pad",
-    details: l.mission?.description ?? "Live data from Launch Library 2.",
-    image: "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=60&auto=format&fit=crop"
-  }));
+  return list.slice(0, 12).map((l) => {
+    const name = l.name ?? "Upcoming launch";
+    const vehicle = l.rocket?.configuration?.name
+      ?? l.launcher?.full_name ?? l.launcher?.name
+      ?? (name.includes("|") ? name.split("|")[0].trim() : null)
+      ?? "Unknown vehicle";
+    const padName = typeof l.pad === "string" ? l.pad : l.pad?.name;
+    const padLoc = l.location ?? l.pad?.location?.name;
+    const missionText = typeof l.mission === "string" ? l.mission : l.mission?.description;
+    return {
+      id: `ll2-${l.id ?? l.name}`,
+      name,
+      date: l.net ?? l.window_start ?? null,
+      provider: l.launch_service_provider?.name ?? l.lsp_name ?? "Unknown provider",
+      vehicle,
+      pad: [padName, padLoc].filter(Boolean).join(", ") || "Unknown pad",
+      details: missionText ?? "Live data from Launch Library 2.",
+      image: l.image ?? "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?w=800&q=60&auto=format&fit=crop"
+    };
+  });
 }

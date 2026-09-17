@@ -95,14 +95,6 @@ export function readFiltersFromURL(keys) {
   return out;
 }
 
-export function clearToolbar(form) {
-  if (!form) return;
-  form.querySelectorAll("input, select").forEach((el) => {
-    el.value = "";
-  });
-  form.dispatchEvent(new Event("reset-filters", { bubbles: true }));
-}
-
 export function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
