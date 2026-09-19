@@ -143,7 +143,7 @@ body {
 
 /* Dialog */
 dialog { border: 1px solid var(--border); background: var(--glass-solid); color: var(--text);
-  border-radius: var(--radius-lg); padding: 0; width: min(640px, calc(100vw - 2rem)); box-shadow: var(--shadow);
+  border-radius: var(--radius-lg); padding: 0; margin: auto; width: min(640px, calc(100vw - 2rem)); box-shadow: var(--shadow);
   overscroll-behavior: contain; }
 dialog::backdrop { background: rgb(0 0 0 / 0.68); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 .dialog-body { padding: 1.4rem; }

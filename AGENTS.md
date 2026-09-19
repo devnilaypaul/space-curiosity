@@ -9,6 +9,7 @@ Ask the user one question at a time. One question's answer can change the next q
 - Serve over HTTP, never `file://`: `npx serve .` (ES modules and `fetch` break on file open). Use the `localhost` URL it prints.
 - No build, tests, or linter. Verify with `node --check js/*.js` and screenshots.
 - Visual verification: use `playwright-cli` (`screenshot`, `goto`, `eval`). Capture screenshots after UI changes and review them before finishing. Screenshot artifacts go to `.playwright-cli/` (gitignored).
+- Never run commands that can get stuck: no `playwright-cli open --headed` (headed sessions never auto-close), no foreground `npx serve`, always pass an explicit short shell `timeout`, and always clean up with `close-all` / `kill-all` plus `Stop-Job` / `Remove-Job`.
 
 ## Architecture
 
